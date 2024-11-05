@@ -50,3 +50,18 @@ export const toggleTaskComplete = async (taskId) => {
     throw error;
   }
 };
+
+// Função para registrar um novo usuário
+export const registerUser = async (username, password, email) => {
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/register/', {
+      username,
+      password,
+      email,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao registrar usuário:", error.response.data);
+    throw error;
+  }
+};

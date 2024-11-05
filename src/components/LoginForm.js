@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loginUser } from '../services/api';
+import { loginUser, registerUser } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -9,12 +9,17 @@ import {
   Button,
   Link,
   Alert,
+  Modal,
+  Stack,
 } from '@mui/material';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [registerData, setRegisterData] = useState({ username: '', password: '', email: '' });
+  const [registerError, setRegisterError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -27,9 +32,28 @@ function LoginForm() {
     }
   };
 
+  const handleRegister = async () => {
+    try {
+      await registerUser(registerData.username, registerData.password, registerData.email);
+      setRegisterError('');
+      setIsRegisterModalOpen(false);
+    } catch (error) {
+      setRegisterError('Erro ao registrar. Verifique os dados e tente novamente.');
+    }
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     handleLogin();
+  };
+
+  const handleOpenRegisterModal = () => {
+    setIsRegisterModalOpen(true);
+  };
+
+  const handleCloseRegisterModal = () => {
+    setIsRegisterModalOpen(false);
+    setRegisterError('');
   };
 
   return (
@@ -95,13 +119,80 @@ function LoginForm() {
             </Button>
             <Typography align="center" variant="body2">
               Ainda não tem uma conta?{' '}
-              <Link href="/signup" color="primary" underline="hover">
+              <Link onClick={handleOpenRegisterModal} color="primary" underline="hover" sx={{ cursor: 'pointer' }}>
                 Cadastre-se
               </Link>
             </Typography>
           </Box>
         </form>
       </Paper>
+
+      <Modal open={isRegisterModalOpen} onClose={handleCloseRegisterModal}>
+        <Paper
+          elevation={3}
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            padding: 4,
+            width: 400,
+            borderRadius: '12px',
+          }}
+        >
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Cadastre-se
+          </Typography>
+          <Stack spacing={2}>
+            <TextField
+              label="Usuário"
+              variant="filled"
+              value={registerData.username}
+              onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+              required
+              fullWidth
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              label="Senha"
+              variant="filled"
+              type="password"
+              value={registerData.password}
+              onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+              required
+              fullWidth
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              label="Email"
+              variant="filled"
+              value={registerData.email}
+              onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+              fullWidth
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            {registerError && (
+              <Alert severity="error" sx={{ fontSize: '0.9rem', textAlign: 'center' }}>
+                {registerError}
+              </Alert>
+            )}
+            <Stack direction="row" justifyContent="space-between">
+              <Button onClick={handleCloseRegisterModal} color="secondary">
+                Cancelar
+              </Button>
+              <Button onClick={handleRegister} variant="contained" color="primary">
+                Cadastrar
+              </Button>
+            </Stack>
+          </Stack>
+        </Paper>
+      </Modal>
     </Box>
   );
 }
