@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchTasks, toggleTaskComplete, fetchTask, updateTask, fetchCategories } from '../services/api';
+import { fetchTasks, toggleTaskComplete, fetchTask, updateTask, fetchCategories, fetchUsers } from '../services/api';
 import {
   Checkbox,
   Table,
@@ -39,6 +39,7 @@ function TaskList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,8 +62,18 @@ function TaskList() {
       }
     };
 
+    const loadUsers = async () => {
+      try {
+        const usersData = await fetchUsers();
+        setUsers(usersData);
+      } catch (error) {
+        console.error("Erro ao carregar usuários:", error);
+      }
+    };
+
     loadTasks();
     loadCategories();
+    loadUsers();
   }, [page]);
 
   const handleToggleComplete = async (taskId) => {
@@ -109,6 +120,14 @@ function TaskList() {
     }));
   };
 
+  const handleShareWithChange = (event) => {
+    const userIds = event.target.value;
+    setSelectedTask((prevTask) => ({
+      ...prevTask,
+      shared_with: userIds.map((id) => users.find((user) => user.id === id)),
+    }));
+  };
+
   const handleUpdateTask = async () => {
     try {
       await updateTask(selectedTask.id, {
@@ -116,6 +135,7 @@ function TaskList() {
         description: selectedTask.description,
         completed: selectedTask.completed,
         category_id: selectedTask.category ? selectedTask.category.id : null,
+        shared_with: selectedTask.shared_with.map((user) => user.id),
       });
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
@@ -152,15 +172,15 @@ function TaskList() {
             Adicionar Tarefa
           </Button>
         </Stack>
-        <Table>
+        <Table sx={{ tableLayout: 'fixed', width: '100%' }}>
           <TableHead>
             <TableRow>
-              <TableCell align="center" sx={{ fontWeight: 'bold' }}>Status</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 'bold' }}>Editar</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 'bold' }}>Título</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 'bold' }}>Descrição</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 'bold' }}>Categoria</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 'bold' }}>Compartilhado</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Status</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Editar</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '150px', whiteSpace: 'normal', wordWrap: 'break-word' }}>Título</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word' }}>Descrição</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '150px' }}>Categoria</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', whiteSpace: 'normal', wordBreak: 'break-word' }}>Compartilhado</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -193,6 +213,8 @@ function TaskList() {
                           textDecoration: task.completed ? 'line-through' : 'none',
                           fontWeight: task.completed ? 'normal' : 'bold',
                           color: task.completed ? '#888' : 'inherit',
+                          whiteSpace: 'normal',
+                          wordWrap: 'break-word',
                         }}
                       >
                         {task.title}
@@ -204,6 +226,8 @@ function TaskList() {
                         style={{
                           textDecoration: task.completed ? 'line-through' : 'none',
                           color: task.completed ? '#888' : 'inherit',
+                          whiteSpace: 'normal',
+                          wordWrap: 'break-word',
                         }}
                       >
                         {task.description}
@@ -217,10 +241,10 @@ function TaskList() {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
                       {task.shared_with.length > 0 ? (
                         <Tooltip title={`Compartilhado com: ${task.shared_with.map((user) => user.username).join(', ')}`}>
-                          <Stack direction="row" spacing={1}>
+                          <Stack direction="row" spacing={1} flexWrap="wrap">
                             {task.shared_with.map((user) => (
                               <Chip key={user.id} label={user.username} size="small" color="success" variant="outlined" />
                             ))}
@@ -306,6 +330,20 @@ function TaskList() {
                   {categories.map((category) => (
                     <MenuItem key={category.id} value={category.id}>
                       {category.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl variant="filled" fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Compartilhar com</InputLabel>
+                <Select
+                  multiple
+                  value={selectedTask.shared_with.map((user) => user.id)}
+                  onChange={handleShareWithChange}
+                >
+                  {users.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      {user.username}
                     </MenuItem>
                   ))}
                 </Select>
