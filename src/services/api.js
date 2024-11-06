@@ -22,6 +22,19 @@ export const fetchTasks = async (page = 1) => {
   }
 };
 
+// Função para buscar uma tarefa específica
+export const fetchTask = async (taskId) => {
+  try {
+    const response = await axios.get(`${API_URL}/tasks/${taskId}/`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar tarefa:", error);
+    throw error;
+  }
+};
+
 // Função para fazer login do usuário
 export const loginUser = async (username, password) => {
   try {
@@ -67,6 +80,19 @@ export const createTask = async (taskData) => {
     return response.data;
   } catch (error) {
     console.error("Erro ao criar tarefa:", error.response.data);
+    throw error;
+  }
+};
+
+// Função para atualizar uma tarefa específica
+export const updateTask = async (taskId, updatedData) => {
+  try {
+    const response = await axios.put(`${API_URL}/tasks/${taskId}/`, updatedData, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao atualizar tarefa:", error);
     throw error;
   }
 };
@@ -122,15 +148,12 @@ export const fetchUsers = async () => {
     const response = await axios.get(`${API_URL}/users/`, {
       headers: getAuthHeaders(),
     });
-    console.log(response.data);
-    
     return response.data.results; 
   } catch (error) {
     console.error("Erro ao buscar usuários:", error);
     return [];
   }
 };
-
 
 // Função para compartilhar uma tarefa com um usuário
 export const shareTask = async (taskId, userId) => {
@@ -147,4 +170,3 @@ export const shareTask = async (taskId, userId) => {
     throw error;
   }
 };
-
