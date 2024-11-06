@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchTasks, toggleTaskComplete, fetchTask, updateTask, fetchCategories, fetchUsers, deleteTask } from '../services/api';
+import { fetchTasks, toggleTaskComplete, fetchTask, updateTask, deleteTask, fetchCategories, fetchUsers } from '../services/api';
 import {
   Checkbox,
   Table,
@@ -157,14 +157,14 @@ function TaskList() {
   };
 
   const handleDeleteClick = (taskId) => {
-    setTaskToDelete(taskId);
-    setIsDeleteDialogOpen(true);
+    setTaskToDelete(taskId); 
+    setIsDeleteDialogOpen(true); 
   };
 
   const handleConfirmDelete = async () => {
     if (taskToDelete) {
       try {
-        await deleteTask(taskToDelete);
+        await deleteTask(taskToDelete); 
         setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskToDelete));
         setIsDeleteDialogOpen(false);
         setTaskToDelete(null);
@@ -207,12 +207,11 @@ function TaskList() {
           <TableHead>
             <TableRow>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Status</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Editar</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Excluir</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '150px', whiteSpace: 'normal', wordWrap: 'break-word' }}>Título</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word' }}>Descrição</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '150px' }}>Categoria</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold', whiteSpace: 'normal', wordBreak: 'break-word' }}>Compartilhado</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Ações</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -233,16 +232,6 @@ function TaskList() {
                           }}
                         />
                       </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton onClick={() => handleOpenModal(task.id)}>
-                        <EditIcon color="primary" />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton onClick={() => handleDeleteClick(task.id)}>
-                        <DeleteIcon color="error" />
-                      </IconButton>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body1"
@@ -293,9 +282,23 @@ function TaskList() {
                         </Typography>
                       )}
                     </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={1} justifyContent="center">
+                        <Tooltip title="Editar tarefa">
+                          <IconButton onClick={() => handleOpenModal(task.id)} size="small">
+                            <EditIcon color="primary" fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Excluir tarefa">
+                          <IconButton onClick={() => handleDeleteClick(task.id)} size="small">
+                            <DeleteIcon color="error" fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={6}>
                       <Divider />
                     </TableCell>
                   </TableRow>
@@ -303,7 +306,7 @@ function TaskList() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={6} align="center">
                   Nenhuma tarefa encontrada.
                 </TableCell>
               </TableRow>
@@ -320,7 +323,7 @@ function TaskList() {
           />
         </Box>
       </TableContainer>
-
+      
       {/* Diálogo de confirmação de exclusão */}
       <Dialog
         open={isDeleteDialogOpen}
