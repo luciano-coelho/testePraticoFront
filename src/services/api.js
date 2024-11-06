@@ -170,3 +170,15 @@ export const shareTask = async (taskId, userId) => {
     throw error;
   }
 };
+
+// Função para excluir uma tarefa específica
+export const deleteTask = async (taskId) => {
+  try {
+    await axios.delete(`${API_URL}/tasks/${taskId}/`, {
+      headers: getAuthHeaders(),
+    });
+  } catch (error) {
+    console.error("Erro ao excluir a tarefa:", error);
+    throw error;
+  }
+};

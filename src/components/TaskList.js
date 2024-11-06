@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchTasks, toggleTaskComplete, fetchTask, updateTask, fetchCategories, fetchUsers } from '../services/api';
+import { fetchTasks, toggleTaskComplete, fetchTask, updateTask, fetchCategories, fetchUsers, deleteTask } from '../services/api';
 import {
   Checkbox,
   Table,
@@ -25,11 +25,17 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 
 function TaskList() {
@@ -40,6 +46,8 @@ function TaskList() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -148,6 +156,29 @@ function TaskList() {
     }
   };
 
+  const handleDeleteClick = (taskId) => {
+    setTaskToDelete(taskId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (taskToDelete) {
+      try {
+        await deleteTask(taskToDelete);
+        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskToDelete));
+        setIsDeleteDialogOpen(false);
+        setTaskToDelete(null);
+      } catch (error) {
+        console.error("Erro ao excluir a tarefa:", error);
+      }
+    }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setTaskToDelete(null);
+  };
+
   const handleAddTask = () => {
     navigate('/create-task');
   };
@@ -177,6 +208,7 @@ function TaskList() {
             <TableRow>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Status</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Editar</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '80px' }}>Excluir</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '150px', whiteSpace: 'normal', wordWrap: 'break-word' }}>Título</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word' }}>Descrição</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold', maxWidth: '150px' }}>Categoria</TableCell>
@@ -205,6 +237,11 @@ function TaskList() {
                     <TableCell align="center">
                       <IconButton onClick={() => handleOpenModal(task.id)}>
                         <EditIcon color="primary" />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton onClick={() => handleDeleteClick(task.id)}>
+                        <DeleteIcon color="error" />
                       </IconButton>
                     </TableCell>
                     <TableCell>
@@ -258,7 +295,7 @@ function TaskList() {
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={7}>
                       <Divider />
                     </TableCell>
                   </TableRow>
@@ -266,7 +303,7 @@ function TaskList() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={7} align="center">
                   Nenhuma tarefa encontrada.
                 </TableCell>
               </TableRow>
@@ -283,6 +320,29 @@ function TaskList() {
           />
         </Box>
       </TableContainer>
+
+      {/* Diálogo de confirmação de exclusão */}
+      <Dialog
+        open={isDeleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Confirmação de Exclusão</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Deseja realmente excluir esta tarefa?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+            Excluir
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Modal de Edição */}
       <Modal open={isModalOpen} onClose={handleCloseModal}>
