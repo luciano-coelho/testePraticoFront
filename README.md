@@ -58,8 +58,8 @@ Este repositório contém o frontend de uma aplicação de gerenciamento de tare
 
 - **API Backend**: Certifique-se de que o backend esteja em execução
 - **Conexão com o Banco de Dados:** Este frontend depende da conexão com um backend para funcionar corretamente. Verifique as instruções do backend para configuração.
-    ```bash
-    https://github.com/luciano-coelho/testePratico/blob/main/README.md
+**Backend:** [https://github.com/luciano-coelho/testePratico/blob/main/README.md](https://github.com/luciano-coelho/testePratico/blob/main/README.md)
+
 
 ## Decisões de Design
 

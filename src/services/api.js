@@ -9,6 +9,49 @@ const getAuthHeaders = () => {
   };
 };
 
+// Função para renovar o token de acesso usando o refresh token
+const refreshToken = async () => {
+  const refresh = localStorage.getItem('refresh_token');
+  if (!refresh) throw new Error("No refresh token available");
+
+  try {
+    const response = await axios.post(`${API_URL}/token/refresh/`, { refresh });
+    const { access } = response.data;
+
+    localStorage.setItem('access_token', access);
+    return access;
+  } catch (error) {
+    console.error("Erro ao renovar o token:", error);
+    throw error;
+  }
+};
+
+// Interceptador de resposta para verificar o status 401 e tentar renovar o token
+axios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const newAccessToken = await refreshToken();
+        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+        return axios(originalRequest);
+      } catch (refreshError) {
+        window.alert('Sessão expirada. Faça login novamente');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 // Função para buscar todas as tarefas com paginação
 export const fetchTasks = async (page = 1) => {
   try {
