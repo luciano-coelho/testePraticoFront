@@ -262,7 +262,12 @@ function TaskForm() {
             <Button onClick={closeCategoryModal} color="secondary">
               Cancelar
             </Button>
-            <Button variant="contained" onClick={handleCreateCategory} color="primary">
+            <Button 
+              variant="contained" 
+              onClick={handleCreateCategory} 
+              color="primary" 
+              disabled={!newCategoryName.trim()}
+            >
               Criar
             </Button>
           </Stack>

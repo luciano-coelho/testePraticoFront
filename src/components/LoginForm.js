@@ -20,15 +20,19 @@ function LoginForm() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [registerData, setRegisterData] = useState({ username: '', password: '', email: '' });
   const [registerError, setRegisterError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       await loginUser(username, password);
       setError('');
       navigate('/tasks');
     } catch (error) {
-      setError('Credenciais inválidas. Tente novamente.');
+      setError(error?.response?.data?.message || 'Credenciais inválidas. Tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,6 +48,10 @@ function LoginForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (!username || !password) {
+      setError("Por favor, preencha todos os campos.");
+      return;
+    }
     handleLogin();
   };
 
@@ -112,10 +120,11 @@ function LoginForm() {
               variant="contained"
               color="primary"
               size="large"
+              disabled={isLoading}
               sx={{ paddingY: 1.2 }}
               fullWidth
             >
-              Entrar
+              {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
             <Typography align="center" variant="body2">
               Ainda não tem uma conta?{' '}
