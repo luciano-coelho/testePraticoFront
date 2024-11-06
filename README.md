@@ -1,70 +1,74 @@
-# Getting Started with Create React App
+# Teste Prático Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Este repositório contém o frontend de uma aplicação de gerenciamento de tarefas desenvolvida em React. 
 
-## Available Scripts
+## Tecnologias Utilizadas
 
-In the project directory, you can run:
+- React
+- Material-UI (MUI)
+- Axios
+- React Router
 
-### `npm start`
+## Pré-requisitos
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Node.js >= 18
+- Docker
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Configuração do Projeto
 
-### `npm test`
+1. **Clone o repositório**:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+   ```bash
+    git clone https://github.com/luciano-coelho/testePraticoFront.git
+    cd testePraticoFront
 
-### `npm run build`
+2. **Crie a imagem Docker**:
+    ```bash
+    docker build -t task-manager-frontend .
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. **Execute o container Docker**:
+    ```bash
+    docker run -p 3000:3000 task-manager-frontend
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+4. **A aplicação estará disponível em**:
+    ```bash
+    http://localhost:3000
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Scripts Disponíveis
 
-### `npm run eject`
+- npm start
+- npm run build
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Funcionalidades
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**Login e Registro de Usuário**:
+- Os usuários podem se registrar e fazer login na aplicação.
+- O sistema usa tokens JWT para autenticação. Após o login, o token é armazenado no localStorage.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+**CRUD de Tarefas**:
+- **Criar Tarefa:** Adicione uma nova tarefa, incluindo título, descrição, e categoria.
+- **Editar Tarefa:** Atualize as informações da tarefa, como título, descrição, status de conclusão, e compartilhe com outros usuários.
+- **Excluir Tarefa:** Confirme a exclusão de uma tarefa através de um modal.
+- **Compartilhar Tarefa:** Atribua a tarefa para outro usuário na aplicação.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+**Paginação**:
+- A lista de tarefas é paginada.
 
-## Learn More
+## Observações
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **API Backend**: Certifique-se de que o backend esteja em execução
+- **Conexão com o Banco de Dados:** Este frontend depende da conexão com um backend para funcionar corretamente. Verifique as instruções do backend para configuração.
+    ```bash
+    https://github.com/luciano-coelho/testePratico/blob/main/README.md
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Decisões de Design
 
-### Code Splitting
+- **Estrutura em Componentes**: A aplicação foi dividida em componentes para que cada funcionalidade principal (ex.: login, criação de tarefas, lista de tarefas) fosse encapsulada em um componente próprio. Isso facilita a manutenção e a reusabilidade.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- **Material-UI para Consistência Visual**: A biblioteca Material-UI foi escolhida para fornecer uma interface amigável e responsiva, além de simplificar o uso de elementos complexos, como diálogos de confirmação e formulários de entrada.
 
-### Analyzing the Bundle Size
+- **Axios para Consumo da API**: Axios foi selecionado para lidar com as requisições HTTP devido à sua simplicidade e flexibilidade. As funções de API foram centralizadas em um único arquivo (api.js) para facilitar a manutenção e isolar as chamadas de rede do restante da lógica do aplicativo.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **Gerenciamento de Autenticação com Token**: O token de autenticação é armazenado no localStorage, e as rotas privadas são protegidas através da validação de token no frontend. Esse token é incluído no cabeçalho de cada requisição, e a navegação é controlada por componentes de rota privados.
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Modularização de Estilos e Layout**: O uso de Material-UI permite definir estilos específicos e centralizar o controle de layout, como nos modais de login e edição de tarefa. Isso torna a interface mais responsiva e consistente.
