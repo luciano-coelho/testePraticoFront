@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchTasks, toggleTaskComplete, fetchTask, updateTask } from '../services/api';
+import { fetchTasks, toggleTaskComplete, fetchTask, updateTask, fetchCategories } from '../services/api';
 import {
   Checkbox,
   Table,
@@ -21,6 +21,10 @@ import {
   Modal,
   TextField,
   FormControlLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -34,6 +38,7 @@ function TaskList() {
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,7 +51,18 @@ function TaskList() {
         console.error("Erro ao carregar as tarefas:", error);
       }
     };
+
+    const loadCategories = async () => {
+      try {
+        const categoriesData = await fetchCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error("Erro ao carregar categorias:", error);
+      }
+    };
+
     loadTasks();
+    loadCategories();
   }, [page]);
 
   const handleToggleComplete = async (taskId) => {
@@ -85,6 +101,14 @@ function TaskList() {
     }));
   };
 
+  const handleCategoryChange = (event) => {
+    const categoryId = event.target.value;
+    setSelectedTask((prevTask) => ({
+      ...prevTask,
+      category: categories.find((category) => category.id === categoryId),
+    }));
+  };
+
   const handleUpdateTask = async () => {
     try {
       await updateTask(selectedTask.id, {
@@ -114,7 +138,7 @@ function TaskList() {
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-      <TableContainer component={Paper} sx={{ maxWidth: 1200, p: 3, borderRadius: 2 }}>
+      <TableContainer component={Paper} sx={{ maxWidth: 900, p: 3, borderRadius: 2 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
           <Typography variant="h5" fontWeight="bold">
             Lista de Tarefas
@@ -272,6 +296,20 @@ function TaskList() {
                 onChange={handleEditChange}
                 sx={{ mb: 2 }}
               />
+              <FormControl variant="filled" fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Categoria</InputLabel>
+                <Select
+                  value={selectedTask.category ? selectedTask.category.id : ''}
+                  onChange={handleCategoryChange}
+                >
+                  <MenuItem value="">Nenhuma categoria</MenuItem>
+                  {categories.map((category) => (
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <FormControlLabel
                 control={
                   <Checkbox
