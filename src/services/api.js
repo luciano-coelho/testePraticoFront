@@ -115,3 +115,36 @@ export const createCategory = async (name) => {
     throw error;
   }
 };
+
+// Função para buscar todos os usuários
+export const fetchUsers = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/users/`, {
+      headers: getAuthHeaders(),
+    });
+    console.log(response.data);
+    
+    return response.data.results; 
+  } catch (error) {
+    console.error("Erro ao buscar usuários:", error);
+    return [];
+  }
+};
+
+
+// Função para compartilhar uma tarefa com um usuário
+export const shareTask = async (taskId, userId) => {
+  try {
+    await axios.post(
+      `${API_URL}/tasks/${taskId}/share/`,
+      { user_id: userId },
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+  } catch (error) {
+    console.error("Erro ao compartilhar tarefa:", error);
+    throw error;
+  }
+};
+

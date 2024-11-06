@@ -16,7 +16,7 @@ import {
   FormControl,
   Modal,
 } from '@mui/material';
-import { createTask, fetchCategories, createCategory } from '../services/api';
+import { createTask, fetchCategories, createCategory, fetchUsers, shareTask } from '../services/api';
 
 function TaskForm() {
   const [taskData, setTaskData] = useState({
@@ -26,6 +26,8 @@ function TaskForm() {
     category_id: '',
   });
   const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [error, setError] = useState('');
@@ -33,15 +35,18 @@ function TaskForm() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadCategoriesAndUsers = async () => {
       try {
         const categoriesList = await fetchCategories();
         setCategories(categoriesList);
+        
+        const usersList = await fetchUsers();
+        setUsers(usersList);
       } catch (error) {
-        console.error('Erro ao carregar categorias:', error);
+        console.error('Erro ao carregar categorias ou usuários:', error);
       }
     };
-    loadCategories();
+    loadCategoriesAndUsers();
   }, []);
 
   const handleChange = (event) => {
@@ -62,9 +67,14 @@ function TaskForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      await createTask(taskData);
+      const createdTask = await createTask(taskData);
       setSuccessMessage('Tarefa criada com sucesso!');
       setError('');
+
+      if (selectedUser) {
+        await shareTask(createdTask.id, selectedUser);
+      }
+
       setTimeout(() => navigate('/tasks'), 2000);
     } catch (error) {
       setError('Erro ao criar a tarefa. Tente novamente.');
@@ -154,6 +164,30 @@ function TaskForm() {
             <Button variant="text" onClick={openCategoryModal} color="primary">
               + Nova Categoria
             </Button>
+
+            {/* Campo para selecionar o usuário com quem compartilhar */}
+            <FormControl variant="filled" fullWidth>
+              <InputLabel>Compartilhar com</InputLabel>
+              <Select
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+                displayEmpty
+              >
+                <MenuItem value=""></MenuItem>
+                {Array.isArray(users) && users.length > 0 ? (
+                  users.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      {user.username}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled>
+                    Nenhum usuário disponível
+                  </MenuItem>
+                )}
+              </Select>
+            </FormControl>
+
             <FormControlLabel
               control={
                 <Checkbox
