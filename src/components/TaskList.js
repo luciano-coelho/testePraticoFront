@@ -16,26 +16,31 @@ import {
   Chip,
   Button,
   Box,
+  Pagination,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import { useNavigate } from 'react-router-dom';
 
 function TaskList() {
   const [tasks, setTasks] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadTasks = async () => {
       try {
-        const data = await fetchTasks();
-        console.log("Dados recebidos:", data);
-        setTasks(data);
+        const data = await fetchTasks(page);
+        setTasks(data.results || []);
+        setTotalPages(Math.ceil(data.count / 10));
       } catch (error) {
         console.error("Erro ao carregar as tarefas:", error);
       }
     };
     loadTasks();
-  }, []);
+  }, [page]);
 
   const handleToggleComplete = async (taskId) => {
     try {
@@ -50,6 +55,14 @@ function TaskList() {
     }
   };
 
+  const handleAddTask = () => {
+    navigate('/create-task'); 
+  };
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
       <TableContainer component={Paper} sx={{ maxWidth: 900, p: 3, borderRadius: 2 }}>
@@ -60,6 +73,7 @@ function TaskList() {
           <Button
             variant="contained"
             startIcon={<AddCircleOutlineIcon />}
+            onClick={handleAddTask}
             sx={{ bgcolor: '#007bff', ':hover': { bgcolor: '#0056b3' } }}
           >
             Adicionar Tarefa
@@ -67,7 +81,7 @@ function TaskList() {
         </Stack>
         <Table>
           <TableHead>
-          <TableRow>
+            <TableRow>
               <TableCell align="center" sx={{ fontWeight: 'bold' }}>Status</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold' }}>Título</TableCell>
               <TableCell align="center" sx={{ fontWeight: 'bold' }}>Descrição</TableCell>
@@ -167,6 +181,15 @@ function TaskList() {
             )}
           </TableBody>
         </Table>
+        {/* Componente de paginação */}
+        <Box mt={2} display="flex" justifyContent="center">
+          <Pagination
+            count={totalPages} 
+            page={page}
+            onChange={handlePageChange} 
+            color="primary"
+          />
+        </Box>
       </TableContainer>
     </Box>
   );

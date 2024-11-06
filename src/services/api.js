@@ -1,25 +1,31 @@
-// api.js
-
 import axios from 'axios';
 
-export const fetchTasks = async () => {
+const API_URL = 'http://127.0.0.1:8000/api';
+
+const getAuthHeaders = () => {
   const token = localStorage.getItem('access_token');
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+// Função para buscar todas as tarefas com paginação
+export const fetchTasks = async (page = 1) => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/tasks/', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await axios.get(`${API_URL}/tasks/?page=${page}`, {
+      headers: getAuthHeaders(),
     });
-    return response.data.results;
+    return response.data;
   } catch (error) {
     console.error("Erro ao buscar tarefas:", error);
     throw error;
   }
 };
 
+// Função para fazer login do usuário
 export const loginUser = async (username, password) => {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/token/', {
+    const response = await axios.post(`${API_URL}/token/`, {
       username,
       password,
     });
@@ -37,13 +43,14 @@ export const loginUser = async (username, password) => {
 
 // Função para alternar o status de conclusão de uma tarefa
 export const toggleTaskComplete = async (taskId) => {
-  const token = localStorage.getItem('access_token');
   try {
-    const response = await axios.patch(`http://127.0.0.1:8000/api/tasks/${taskId}/toggle_complete/`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.patch(
+      `${API_URL}/tasks/${taskId}/toggle_complete/`,
+      {},
+      {
+        headers: getAuthHeaders(),
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Erro ao alternar status da tarefa:", error);
@@ -51,10 +58,23 @@ export const toggleTaskComplete = async (taskId) => {
   }
 };
 
+// Função para criar uma nova tarefa
+export const createTask = async (taskData) => {
+  try {
+    const response = await axios.post(`${API_URL}/tasks/`, taskData, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao criar tarefa:", error.response.data);
+    throw error;
+  }
+};
+
 // Função para registrar um novo usuário
 export const registerUser = async (username, password, email) => {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/register/', {
+    const response = await axios.post(`${API_URL}/register/`, {
       username,
       password,
       email,
@@ -62,6 +82,36 @@ export const registerUser = async (username, password, email) => {
     return response.data;
   } catch (error) {
     console.error("Erro ao registrar usuário:", error.response.data);
+    throw error;
+  }
+};
+
+// Função para buscar todas as categorias
+export const fetchCategories = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/categories/`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data.results || [];
+  } catch (error) {
+    console.error("Erro ao buscar categorias:", error);
+    return [];
+  }
+};
+
+// Função para criar uma nova categoria
+export const createCategory = async (name) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/categories/`,
+      { name },
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao criar categoria:", error);
     throw error;
   }
 };
